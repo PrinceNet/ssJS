@@ -15,7 +15,7 @@ function populateVoiceList() {
   voices = synth.getVoices();
   var selectedIndex = voiceSelect.selectedIndex < 0 ? 0 : voiceSelect.selectedIndex;
   voiceSelect.innerHTML = '';
-  for(i = 0; i < voices.length ; i++) {
+  for(var i = 0; i < voices.length ; i++) {
     var option = document.createElement('option');
     option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
 
@@ -49,7 +49,7 @@ function speak(){
         console.error('SpeechSynthesisUtterance.onerror');
     }
     var selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
-    for(i = 0; i < voices.length ; i++) {
+    for(var i = 0; i < voices.length ; i++) {
       if(voices[i].name === selectedOption) {
         utterThis.voice = voices[i];
       }
