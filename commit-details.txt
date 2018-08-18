@@ -1,0 +1,7 @@
+1. changed file and folder structure
+tests - for tests
+ssjs - for the library itself
+
+
+2. changed the let variables inside ssjs.js to var variables. (let is a ES6 feature),
+and var is inside the module scope (not global).
