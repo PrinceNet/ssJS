@@ -8,6 +8,7 @@
 
   var utterance;
   var data = {};
+  var ssComponents = [];
 
   function init(args) {
     utterance = new SpeechSynthesisUtterance();
@@ -37,8 +38,23 @@
     // then sen an event listener
     window.speechSynthesis.onvoiceschanged = function() {
       var voices = window.speechSynthesis.getVoices();
-      console.log(voices);
+      //  console.log(voices);
     };
+
+    return this;
+  }
+
+  function setUtterance(args) {
+
+    utterance = new SpeechSynthesisUtterance();
+
+    utterance.lang = args.lang;
+    utterance.pitch = args.pitch;
+    utterance.rate = args.rate;
+    utterance.text = args.text;
+    utterance.volume = args.volume;
+
+    ssComponents.push(utterance);
 
     return this;
   }
@@ -48,6 +64,8 @@
     init: init,
     speak: speak,
     getVoices: getVoices,
+    setUtterance: setUtterance,
+    components: ssComponents
   };
 
   global.ss = ss;
