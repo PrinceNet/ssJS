@@ -65,3 +65,13 @@ div.column.is-8:first-child {
 .promo-block .container {
   margin: 1rem 5rem;
 }
+
+.ss-shallow {
+    color: #00d1b2;
+    font-weight: 700;
+}
+
+.ss-shallow > div {
+    color: #4a4a4a;
+    font-weight: 400;
+}

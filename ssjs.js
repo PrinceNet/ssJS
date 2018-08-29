@@ -8,6 +8,7 @@
 
     let utterance;
     let data = {};
+    let shallowArr = [];
 
     function init(args) {
         utterance = new SpeechSynthesisUtterance();
@@ -32,6 +33,41 @@
         speechSynthesis.speak(utterance);
     }
 
+    function speakShallows() {
+        let $this = this;
+        this.shallowArr.forEach(function(element) {
+            let u = new SpeechSynthesisUtterance();
+            u.lang = $this.data.lang;
+            u.pitch = $this.data.pitch;
+            u.rate = $this.data.rate;
+            u.text = $this.data.text;
+            u.volume = $this.data.volume;
+            u.text = element.text;
+            speechSynthesis.speak(u);
+        });
+    }
+
+    function shallow() {
+        let shallow = document.querySelectorAll(".ss-shallow");
+        let text = '';
+
+        shallow.forEach(function(element) {
+            text = '';
+            element.childNodes.forEach(function(child) {
+                if(child.nodeType === Node.TEXT_NODE){
+                    text += ' ' + child.nodeValue.replace(/\s\s+/g, ' ').trim();
+                }
+            });
+
+            shallowArr.push({
+                domElement: element,
+                text: text,
+            });
+        });
+
+        return this;
+    }
+
     function getVoices() {
         // voice list is loaded async to the page
         // then sen an event listener
@@ -48,6 +84,9 @@
         init: init,
         speak: speak,
         getVoices: getVoices,
+        shallow: shallow,
+        shallowArr: shallowArr,
+        speakShallows: speakShallows,
     };
 
     global.ss = ss;
