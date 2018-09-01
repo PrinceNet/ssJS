@@ -24,31 +24,14 @@
           <img src="https://bulma.io/images/bulma-logo.png" alt="Logo">
         </a>
         <span class="navbar-burger burger" data-target="navbarMenu">
-        <span></span>
-        <span></span>
-        <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
         </span>
       </div>
       <div id="navbarMenu" class="navbar-menu">
         <div class="navbar-end">
-          <a class="navbar-item is-active">
-            Home
-          </a>
-          <a class="navbar-item">
-            Examples
-          </a>
-          <a class="navbar-item">
-            Features
-          </a>
-          <a class="navbar-item">
-            Team
-          </a>
-          <a class="navbar-item">
-            Archives
-          </a>
-          <a class="navbar-item">
-            Help
-          </a>
+
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
               Account
@@ -78,7 +61,8 @@
   <section class="hero is-info is-medium is-bold">
     <div class="hero-body">
       <div class="container has-text-centered">
-              <h1 class="title">Lorem ipsum dolor sit amet, consectetur adipiscing elit, <br>sed eiusmod tempor incididunt ut labore et dolore magna aliqua</h1>
+        <h1 class="title">Lorem ipsum dolor sit amet, consectetur adipiscing elit, <br>sed eiusmod tempor incididunt ut labore
+          et dolore magna aliqua</h1>
       </div>
     </div>
   </section>
@@ -93,20 +77,43 @@
           <div class="card-content">
             <div class="media">
               <div class="media-content has-text-centered">
-                <div class="ssComponent1">
+
+                <div data-ss-item="ss-item-0" data-ss-play="standart">
+                  <li data-type="veg" data-distance="2miles" data-identifier="10318">
+                    Salad King
+                    <div>and</div>
+                  </li>
                   <p class="title article-title">The Hidden Garden of Japan</p>
                 </div>
+
                 <div class="tags has-addons level-item">
                   <span class="tag is-rounded is-info">@yokasimo</span>
                   <span class="tag is-rounded">May 10, 2018</span>
                 </div>
               </div>
             </div>
-            <div class="ssComponent2 content article-body">
-              <p>first child </p>
-              <p>second child </p>
-              <p>third child </p>
+            <div data-ss-item="ss-item-1" data-ss-play="custom" class="content article-body">
+              <p data-ss-playIndex="2">third child </p>
+              <p data-ss-playIndex="0">first child </p>
+              <p data-ss-playIndex="1">second child </p>
             </div>
+
+            <div>1
+              <div>
+                2
+                <div>
+                  3
+                </div>
+              </div>
+              <div>
+                4
+                <div>
+                  5
+
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
         <!-- END ARTICLE -->
@@ -115,13 +122,13 @@
     </div>
 
     <a class="button is-primary start-read" style="position: fixed; bottom: 30px; right: 60px;">Read Text</a>
-    <div class="ssComponent3">
+    <div>
       Bye Bye
     </div>
   </div>
 
-  <script src="../ssjs/ssjs.js"></script>
-  <script src="../ssjs/use.js"></script>
+  <script src="../ss/ss.js"></script>
+  <script src="../ss/ss-use.js"></script>
 </body>
 
 </html>
