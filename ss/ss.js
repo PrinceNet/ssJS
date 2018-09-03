@@ -17,7 +17,33 @@
       switch (
         play // the kind of DOM traverse on the current ss element
       ) {
-        case "standart": // ordinary DOM traverse
+        case "shallow":
+          var el = matches[i];
+          var child = el.firstChild;
+          var texts = [];
+          while (child) {
+            if (child.nodeType == Node.TEXT_NODE) {
+              texts.push(child.data);
+            }
+            child = child.nextSibling;
+          }
+          var text = texts.join("");
+          newItem = ss.createItem({
+            play: play,
+            listToPlay: null,
+            name: matches[i].getAttribute("data-ss-item"),
+            domElement: matches[i],
+            lang: "en-GB",
+            pitch: 1,
+            rate: 1,
+            text: text,
+            volume: 1
+          });
+          ss.addItem(newItem);
+
+          break;
+
+        case "deep": // ordinary DOM traverse
           newItem = ss.createItem({
             play: play,
             listToPlay: null,
@@ -93,7 +119,10 @@
     var play = selectedItem.play;
     if (play == "BFS") {
       // BFS DOM traverse
-    } else if (play == "standart") {
+    } else if (play == "shallow") {
+      getVoices();
+      speakSelectedItem();
+    } else if (play == "deep") {
       // normal DOM traverse
       getVoices();
       speakSelectedItem();
