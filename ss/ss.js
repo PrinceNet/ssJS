@@ -5,98 +5,42 @@
  */
 
 (function(global) {
-  var selectedItem;
   var ssItems = {};
+  var selectedItem;
+  var selectedConfig = {};
 
   function init() {
-    var matches = document.querySelectorAll("[data-ss-item]");
-    for (var i = 0; i < matches.length; i++) {
-      var play = matches[i].getAttribute("data-ss-play");
-      var newItem;
+    var domElements = getDOMElements();
+    for (let i = 0; i < domElements.length; i++) {
+      var playStyle = getPlayStyle(domElements[i]);
+      selectedConfig.element = domElements[i];
+      selectedConfig.playStyle = playStyle;
 
       switch (
-        play // the kind of DOM traverse on the current ss element
+        playStyle // The kind of DOM traverse on the current ss element */
       ) {
-        case "shallow":
-          var el = matches[i];
-          var child = el.firstChild;
-          var texts = [];
-          while (child) {
-            if (child.nodeType == Node.TEXT_NODE) {
-              texts.push(child.data);
-            }
-            child = child.nextSibling;
-          }
-          var text = texts.join("");
-          newItem = ss.createItem({
-            play: play,
-            listToPlay: null,
-            name: matches[i].getAttribute("data-ss-item"),
-            domElement: matches[i],
-            lang: "en-GB",
-            pitch: 1,
-            rate: 1,
-            text: text,
-            volume: 1
-          });
-          ss.addItem(newItem);
-
+        case "ss-shallow": // only the element's text
+          initShallowItems();
           break;
 
-        case "deep": // ordinary DOM traverse
-          newItem = ss.createItem({
-            play: play,
-            listToPlay: null,
-            name: matches[i].getAttribute("data-ss-item"),
-            domElement: matches[i],
-            lang: "en-GB",
-            pitch: 1,
-            rate: 1,
-            text: matches[i].textContent,
-            volume: 1
-          });
-          ss.addItem(newItem);
+        case "deep": // DFS DOM traverse
+          initDeepItems();
           break;
 
-        case "BFS": // BFS traverse
+        case "customPlaylist": // traverse with custom playlist
+          initCustomItems();
           break;
-
-        case "custom": // traverse with custom playlist
-          var arrangedItems = [];
-          var playIndexes = matches[i].querySelectorAll("[data-ss-playIndex]");
-          for (let j = 0; j < playIndexes.length; j++) {
-            let index = playIndexes[j].getAttribute("data-ss-playIndex");
-            let text = playIndexes[j].innerText;
-            var newItem = createItem({
-              play: play,
-              playIndex: index,
-              listToPlay: null,
-              name: index,
-              domElement: playIndexes[i],
-              lang: "en-GB",
-              pitch: 1,
-              rate: 1,
-              text: text,
-              volume: 1
-            });
-            arrangedItems[index] = newItem;
-          }
-          newItem = ss.createItem({
-            play: play,
-            listToPlay: arrangedItems,
-            name: matches[i].getAttribute("data-ss-item"),
-            domElement: matches[i],
-            lang: "en-GB",
-            pitch: 1,
-            rate: 1,
-            text: matches[i].textContent,
-            volume: 1
-          });
-          ss.addItem(newItem);
+        case "BFS":
+          break;
+        case "default":
           break;
       }
     }
     return this;
+  }
+
+  function speakItem(item) {
+    speechSynthesis.speak(item);
   }
 
   function speakSelectedItem() {
@@ -105,7 +49,7 @@
 
   function getVoices() {
     window.speechSynthesis.onvoiceschanged = function() {
-      var voices = window.speechSynthesis.getVoices();
+      window.speechSynthesis.getVoices();
     };
     return this;
   }
@@ -116,23 +60,31 @@
 
   function playItem(item) {
     selectItem(item);
-    var play = selectedItem.play;
-    if (play == "BFS") {
-      // BFS DOM traverse
-    } else if (play == "shallow") {
-      getVoices();
-      speakSelectedItem();
-    } else if (play == "deep") {
-      // normal DOM traverse
-      getVoices();
-      speakSelectedItem();
-    } else {
-      // custom playlist traverse
-      var list = selectedItem.listToPlay;
-      for (let i = 0; i < list.length; i++) {
-        selectedItem = list[i];
+    var playStyle = selectedItem.playStyle;
+    switch (playStyle) {
+      case "ss-shallow":
+      case "deep":
+        getVoices();
         speakSelectedItem();
-      }
+        break;
+
+      case "customPlaylist":
+        playCustomItem();
+        break;
+
+      case "BFS":
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  function playCustomItem() {
+    var list = selectedItem.listToPlay;
+    for (let i = 0; i < list.length; i++) {
+      selectedItem = list[i];
+      speakSelectedItem();
     }
   }
 
@@ -149,15 +101,7 @@
 
   function createItem(args) {
     newItem = new SpeechSynthesisUtterance();
-    newItem.name = args.name;
-    newItem.lang = args.lang;
-    newItem.pitch = args.pitch;
-    newItem.rate = args.rate;
-    newItem.text = args.text;
-    newItem.volume = args.volume;
-    newItem.domElement = args.domElement;
-    newItem.play = args.play;
-    newItem.listToPlay = args.listToPlay;
+    Object.assign(newItem, newItem, args);
     return newItem;
   }
 
@@ -166,9 +110,89 @@
   }
 
   function playAllItems() {
-    Object.keys(ssItems).forEach(function(key, index) {
-      ss.playItem(key);
+    Object.keys(ssItems).forEach(function(itemName) {
+      ss.playItem(itemName);
     });
+  }
+  function getDOMElements() {
+    return document.querySelectorAll("[data-ss-item]");
+  }
+  function initDeepItems() {
+    newItem = ss.createItem({
+      playStyle: selectedConfig.playStyle,
+      listToPlay: null,
+      name: selectedConfig.element.getAttribute("data-ss-item"),
+      domElement: selectedConfig.element,
+      lang: "en-GB",
+      pitch: 1, // TODO: create default json properties
+      rate: 1, //       to fill when not mentions by the use
+      text: selectedConfig.element.textContent,
+      volume: 1
+    });
+    ss.addItem(newItem);
+  }
+  function initShallowItems() {
+    var el = selectedConfig.element;
+    var child = el.firstChild;
+    var texts = [];
+    while (child) {
+      if (child.nodeType == Node.TEXT_NODE) {
+        texts.push(child.data);
+      }
+      child = child.nextSibling;
+    }
+    var text = texts.join("");
+    newItem = ss.createItem({
+      playStyle: selectedConfig.playStyle,
+      listToPlay: null,
+      name: selectedConfig.element.getAttribute("data-ss-item"),
+      domElement: selectedConfig.element,
+      lang: "en-GB",
+      pitch: 1,
+      rate: 1,
+      text: text,
+      volume: 1
+    });
+    ss.addItem(newItem);
+  }
+  function initCustomItems() {
+    var arrangedItems = [];
+    var playIndexes = selectedConfig.element.querySelectorAll(
+      "[data-ss-playIndex]"
+    );
+    for (let j = 0; j < playIndexes.length; j++) {
+      let index = playIndexes[j].getAttribute("data-ss-playIndex");
+      let text = playIndexes[j].innerText;
+      var newItem = createItem({
+        playStyle: playStyle,
+        playIndex: index,
+        listToPlay: null,
+        name: index,
+        domElement: playIndexes[i],
+        lang: "en-GB",
+        pitch: 1,
+        rate: 1,
+        text: text,
+        volume: 1
+      });
+      arrangedItems[index] = newItem;
+    }
+    newItem = ss.createItem({
+      playStyle: playStyle,
+      listToPlay: arrangedItems,
+      name: dselectedConfig.element.getAttribute("data-ss-item"),
+      domElement: selectedConfig.element,
+      lang: "en-GB",
+      pitch: 1,
+      rate: 1,
+      text: selectedConfig.element.textContent,
+      volume: 1
+    });
+    ss.addItem(newItem);
+  }
+
+  function getPlayStyle(domElement) {
+    return domElement.getAttribute("data-ss-playStyle");
   }
 
   var publicAPI = {
