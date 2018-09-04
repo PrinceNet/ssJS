@@ -6,8 +6,13 @@
 
 (function(global) {
   var ssItems = {};
+  var defaultConfig;
   var selectedItem;
   var selectedConfig = {};
+
+  ////////////////////////////
+  // Initialization Methods //
+  ////////////////////////////
 
   function init() {
     var domElements = getDOMElements();
@@ -39,6 +44,58 @@
     return this;
   }
 
+  function initDeepItems() {
+    let newItem = ss.createItem();
+    newItem = ss.setItem(newItem, {
+      playStyle: selectedConfig.playStyle,
+      name: selectedConfig.element.getAttribute("data-ss-item"),
+      domElement: selectedConfig.element,
+      text: selectedConfig.element.textContent
+    });
+    ss.addItem(newItem);
+  }
+
+  function initShallowItems() {
+    let newItem = ss.createItem();
+    newItem = ss.setItem(newItem, {
+      playStyle: selectedConfig.playStyle,
+      name: selectedConfig.element.getAttribute("data-ss-item"),
+      domElement: selectedConfig.element,
+      text: getShallowText()
+    });
+    ss.addItem(newItem);
+  }
+  function initCustomItems() {
+    var arrangedItems = [];
+    var playIndexes = selectedConfig.element.querySelectorAll(
+      "[data-ss-playIndex]"
+    );
+    for (let j = 0; j < playIndexes.length; j++) {
+      let index = playIndexes[j].getAttribute("data-ss-playIndex");
+      let text = playIndexes[j].innerText;
+      var newItem = createItem({
+        playStyle: playStyle,
+        playIndex: index,
+        name: index,
+        domElement: playIndexes[i],
+        text: text
+      });
+      arrangedItems[index] = newItem;
+    }
+    newItem = ss.createItem({
+      playStyle: playStyle,
+      listToPlay: arrangedItems,
+      name: dselectedConfig.element.getAttribute("data-ss-item"),
+      domElement: selectedConfig.element,
+      text: selectedConfig.element.textContent
+    });
+    ss.addItem(newItem);
+  }
+
+  ////////////////////////////
+  //  Play/Speak Methods  ////
+  ////////////////////////////
+
   function speakItem(item) {
     speechSynthesis.speak(item);
   }
@@ -46,18 +103,6 @@
   function speakSelectedItem() {
     speechSynthesis.speak(selectedItem);
   }
-
-  function getVoices() {
-    window.speechSynthesis.onvoiceschanged = function() {
-      window.speechSynthesis.getVoices();
-    };
-    return this;
-  }
-
-  function selectItem(itemName) {
-    selectedItem = ssItems[itemName];
-  }
-
   function playItem(item) {
     selectItem(item);
     var playStyle = selectedItem.playStyle;
@@ -88,8 +133,45 @@
     }
   }
 
-  function setVoice() {
-    // setting the voice of the ss Item
+  function playAllItems() {
+    Object.keys(ssItems).forEach(function(itemName) {
+      ss.playItem(itemName);
+    });
+  }
+
+  function getPlayStyle(domElement) {
+    return domElement.getAttribute("data-ss-playStyle");
+  }
+
+  function getVoices() {
+    window.speechSynthesis.onvoiceschanged = function() {
+      window.speechSynthesis.getVoices();
+    };
+    return this;
+  }
+
+  ///////////////////
+  // Other Methods //
+  ///////////////////
+
+  function selectItem(itemName) {
+    selectedItem = ssItems[itemName];
+  }
+
+  function configItem(itemName, newConfig) {
+    var item = ssItems[itemName];
+    Object.assign(item, item, newConfig);
+  }
+
+  function createItem() {
+    newItem = new SpeechSynthesisUtterance();
+    Object.assign(newItem, newItem, defaultConfig);
+    return newItem;
+  }
+
+  function setItem(newItem, properties) {
+    Object.assign(newItem, newItem, properties);
+    return newItem;
   }
 
   function addItem(item) {
@@ -99,39 +181,11 @@
     return this;
   }
 
-  function createItem(args) {
-    newItem = new SpeechSynthesisUtterance();
-    Object.assign(newItem, newItem, args);
-    return newItem;
-  }
-
-  function removeItem(item) {
-    // remove an item from the list of ss Items
-  }
-
-  function playAllItems() {
-    Object.keys(ssItems).forEach(function(itemName) {
-      ss.playItem(itemName);
-    });
-  }
   function getDOMElements() {
     return document.querySelectorAll("[data-ss-item]");
   }
-  function initDeepItems() {
-    newItem = ss.createItem({
-      playStyle: selectedConfig.playStyle,
-      listToPlay: null,
-      name: selectedConfig.element.getAttribute("data-ss-item"),
-      domElement: selectedConfig.element,
-      lang: "en-GB",
-      pitch: 1, // TODO: create default json properties
-      rate: 1, //       to fill when not mentions by the use
-      text: selectedConfig.element.textContent,
-      volume: 1
-    });
-    ss.addItem(newItem);
-  }
-  function initShallowItems() {
+
+  function getShallowText() {
     var el = selectedConfig.element;
     var child = el.firstChild;
     var texts = [];
@@ -142,61 +196,17 @@
       child = child.nextSibling;
     }
     var text = texts.join("");
-    newItem = ss.createItem({
-      playStyle: selectedConfig.playStyle,
-      listToPlay: null,
-      name: selectedConfig.element.getAttribute("data-ss-item"),
-      domElement: selectedConfig.element,
-      lang: "en-GB",
-      pitch: 1,
-      rate: 1,
-      text: text,
-      volume: 1
-    });
-    ss.addItem(newItem);
-  }
-  function initCustomItems() {
-    var arrangedItems = [];
-    var playIndexes = selectedConfig.element.querySelectorAll(
-      "[data-ss-playIndex]"
-    );
-    for (let j = 0; j < playIndexes.length; j++) {
-      let index = playIndexes[j].getAttribute("data-ss-playIndex");
-      let text = playIndexes[j].innerText;
-      var newItem = createItem({
-        playStyle: playStyle,
-        playIndex: index,
-        listToPlay: null,
-        name: index,
-        domElement: playIndexes[i],
-        lang: "en-GB",
-        pitch: 1,
-        rate: 1,
-        text: text,
-        volume: 1
-      });
-      arrangedItems[index] = newItem;
-    }
-    newItem = ss.createItem({
-      playStyle: playStyle,
-      listToPlay: arrangedItems,
-      name: dselectedConfig.element.getAttribute("data-ss-item"),
-      domElement: selectedConfig.element,
-      lang: "en-GB",
-      pitch: 1,
-      rate: 1,
-      text: selectedConfig.element.textContent,
-      volume: 1
-    });
-    ss.addItem(newItem);
+    return text;
   }
 
-  function getPlayStyle(domElement) {
-    return domElement.getAttribute("data-ss-playStyle");
+  function setDefaultConfig(config) {
+    defaultConfig = config;
   }
 
   var publicAPI = {
     init: init,
+    setDefaultConfig: setDefaultConfig,
+    configItem: configItem,
     speakSelectedItem: speakSelectedItem,
     getVoices: getVoices,
     createItem: createItem,
@@ -204,7 +214,8 @@
     ssItems: ssItems,
     playAllItems: playAllItems,
     playItem: playItem,
-    selectItem: selectItem
+    selectItem: selectItem,
+    setItem: setItem
   };
 
   global.ss = publicAPI;
