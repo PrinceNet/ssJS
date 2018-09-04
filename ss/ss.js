@@ -25,15 +25,15 @@
         playStyle // The kind of DOM traverse on the current ss element */
       ) {
         case "ss-shallow": // only the element's text
-          initShallowItems();
+          initShallowItem();
           break;
 
         case "deep": // DFS DOM traverse
-          initDeepItems();
+          initDeepItem();
           break;
 
         case "customPlaylist": // traverse with custom playlist
-          initCustomItems();
+          initCustomItem();
           break;
         case "BFS":
           break;
@@ -44,9 +44,9 @@
     return this;
   }
 
-  function initDeepItems() {
-    let newItem = ss.createItem();
-    newItem = ss.setItem(newItem, {
+  function initDeepItem() {
+    let newItem = createItem();
+    newItem = setItem(newItem, {
       playStyle: selectedConfig.playStyle,
       name: selectedConfig.element.getAttribute("data-ss-item"),
       domElement: selectedConfig.element,
@@ -55,16 +55,41 @@
     ss.addItem(newItem);
   }
 
-  function initShallowItems() {
-    let newItem = ss.createItem();
-    newItem = ss.setItem(newItem, {
+  function initShallowItem() {
+    let newItem = createItem();
+    newItem = setItem(newItem, {
       playStyle: selectedConfig.playStyle,
       name: selectedConfig.element.getAttribute("data-ss-item"),
       domElement: selectedConfig.element,
       text: getShallowText()
     });
+
     ss.addItem(newItem);
   }
+  // ignore this
+  function initShallowItemAtLevel(level) {
+    let selector =
+      selectedConfig.element +
+      new Array(parseInt(level, 10) || 1)
+        .fill(" > * ")
+        .slice(1)
+        .join("");
+    var allLevelItems = document.querySelectorAll(selector);
+    let texts = [];
+    for (let i = 0; i < allLevelItems.length; i++) {
+      texts.push(allLevelItems[i].innerText);
+    }
+    let newItem = createItem();
+    newItem = setItem(newItem, {
+      playStyle: selectedConfig.playStyle,
+      name: selectedConfig.element.getAttribute("data-ss-item"),
+      domElement: selectedConfig.element,
+      text: texts
+    });
+
+    ss.addItem(newItem);
+  }
+
   function initCustomItems() {
     var arrangedItems = [];
     var playIndexes = selectedConfig.element.querySelectorAll(
@@ -73,7 +98,8 @@
     for (let j = 0; j < playIndexes.length; j++) {
       let index = playIndexes[j].getAttribute("data-ss-playIndex");
       let text = playIndexes[j].innerText;
-      var newItem = createItem({
+      let newItem = createItem();
+      var newItem = setItem(newItem, {
         playStyle: playStyle,
         playIndex: index,
         name: index,
@@ -82,14 +108,15 @@
       });
       arrangedItems[index] = newItem;
     }
-    newItem = ss.createItem({
+    let newItem = ss.createItem();
+    newItem = setItem({
       playStyle: playStyle,
       listToPlay: arrangedItems,
       name: dselectedConfig.element.getAttribute("data-ss-item"),
       domElement: selectedConfig.element,
       text: selectedConfig.element.textContent
     });
-    ss.addItem(newItem);
+    addItem(newItem);
   }
 
   ////////////////////////////
@@ -135,7 +162,7 @@
 
   function playAllItems() {
     Object.keys(ssItems).forEach(function(itemName) {
-      ss.playItem(itemName);
+      playItem(itemName);
     });
   }
 
